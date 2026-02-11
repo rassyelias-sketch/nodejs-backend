@@ -3,6 +3,8 @@ const express = require('express');
 const cors = require('cors');
 const connectDB = require('./db/connection');
 const routes = require('./routes');
+const passport = require('passport');
+require('./config/passport');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -14,6 +16,9 @@ connectDB();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Passport (for OAuth)
+app.use(passport.initialize());
 
 // Serve static files
 app.use(express.static('public'));

@@ -1,6 +1,22 @@
 const express = require('express');
 const router = express.Router();
 const userService = require('../services/UserService');
+const passport = require('passport');
+
+// OAuth routes (Google)
+router.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'], session: false }));
+
+router.get('/auth/google/callback', (req, res, next) => {
+  passport.authenticate('google', { session: false }, (err, user, info) => {
+    if (err) return next(err);
+    if (!user) return res.redirect('/?auth=fail');
+
+    // Successful auth - here we can redirect to the UI with a token or return JSON
+    // For simplicity, redirect to the UI root with a simple token param
+    const token = 'google-oauth-token-' + Date.now();
+    return res.redirect(`/?token=${token}`);
+  })(req, res, next);
+});
 
 // Example route
 router.get('/', (req, res) => {

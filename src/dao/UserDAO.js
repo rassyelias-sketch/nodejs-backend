@@ -22,6 +22,11 @@ class UserDAO {
     return await User.findOne({ email });
   }
 
+  // Find user by Google ID
+  async findByGoogleId(googleId) {
+    return await User.findOne({ googleId });
+  }
+
   // Find all users
   async findAll() {
     return await User.find();

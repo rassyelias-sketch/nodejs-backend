@@ -111,6 +111,47 @@ class UserService {
 
     return user.toJSON();
   }
+
+  // Find or create user from Google profile
+  async findOrCreateFromGoogle(profile) {
+    const googleId = profile.id;
+    const email = profile.emails && profile.emails[0] && profile.emails[0].value;
+    const avatar = profile.photos && profile.photos[0] && profile.photos[0].value;
+
+    // Check existing by googleId
+    let user = await userDAO.findByGoogleId(googleId);
+    if (user) return user.toJSON();
+
+    // If user exists by email, link googleId
+    if (email) {
+      const existing = await userDAO.findByEmail(email);
+      if (existing) {
+        const updated = await userDAO.updateById(existing._id, { googleId, avatar });
+        return updated.toJSON();
+      }
+    }
+
+    // Create unique username base from displayName or email
+    let baseUsername = (profile.username || (profile.displayName || '').replace(/\s+/g, '_') || (email ? email.split('@')[0] : 'user')).toLowerCase();
+    baseUsername = baseUsername.replace(/[^a-z0-9_\-\.]/g, '');
+
+    let username = baseUsername;
+    let counter = 1;
+    while (await userDAO.findByUsername(username)) {
+      username = `${baseUsername}${counter}`;
+      counter++;
+    }
+
+    // Create user without password
+    const newUser = await userDAO.create({
+      username,
+      email: email || undefined,
+      googleId,
+      avatar
+    });
+
+    return newUser.toJSON();
+  }
 }
 
 module.exports = new UserService();
