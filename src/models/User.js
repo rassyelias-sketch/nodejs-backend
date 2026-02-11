@@ -29,6 +29,19 @@ const userSchema = new mongoose.Schema({
   avatar: {
     type: String
   },
+  role: {
+    type: String,
+    enum: ['client', 'nurse', 'agency', 'admin'],
+    default: 'client'
+  },
+  phoneNumber: {
+    type: String,
+    default: null
+  },
+  isVerified: {
+    type: Boolean,
+    default: false
+  },
   createdAt: {
     type: Date,
     default: Date.now
